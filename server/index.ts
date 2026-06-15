@@ -9,10 +9,25 @@ import { Redis } from "ioredis";
 const PORT = parseInt(process.env.PORT || "3001", 10);
 
 // ---- HTTP + Socket.io Server ----
-const httpServer = http.createServer();
+function parseCorsOrigins(raw: string | undefined): string | string[] {
+  if (!raw) return "http://localhost:3000";
+  const origins = raw.split(",").map((s) => s.trim()).filter(Boolean);
+  return origins.length === 1 ? origins[0] : origins;
+}
+
+const httpServer = http.createServer((req, res) => {
+  // Health check endpoint for Render
+  if (req.url === "/health" || req.url === "/") {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ status: "ok", uptime: process.uptime() }));
+    return;
+  }
+  res.writeHead(404);
+  res.end();
+});
 const io = new SocketIOServer(httpServer, {
   cors: {
-    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+    origin: parseCorsOrigins(process.env.CORS_ORIGIN),
     methods: ["GET", "POST"],
   },
   transports: ["websocket", "polling"],

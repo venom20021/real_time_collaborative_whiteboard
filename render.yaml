@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: whiteboard-collab-server
+    runtime: node
+    repo: https://github.com/venom20021/real_time_collaborative_whiteboard
+    buildCommand: npm install && npm run db:generate
+    startCommand: npx tsx server/index.ts
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: CORS_ORIGIN
+        value: https://real-time-collaborative-whiteboard.vercel.app
+      - key: REDIS_URL
+        sync: false
+      - key: PORT
+        value: 10000
