@@ -16,5 +16,4 @@ services:
         value: https://real-time-collaborative-whiteboard.vercel.app
       - key: REDIS_URL
         sync: false
-      - key: PORT
-        value: 10000
+
