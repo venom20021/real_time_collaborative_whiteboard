@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  color     String   @default("#6366f1")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  rooms     RoomParticipant[]
+  shapes    Shape[]
+}
+
+model Room {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  participants RoomParticipant[]
+  shapes       Shape[]
+
+  @@map("rooms")
+}
+
+model RoomParticipant {
+  roomId   String
+  userId   String
+  joinedAt DateTime @default(now())
+
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([roomId, userId])
+  @@map("room_participants")
+}
+
+model Shape {
+  id        String   @id @default(cuid())
+  roomId    String
+  type      String   // rect, circle, line, text, arrow, image, path
+  x         Float    @default(0)
+  y         Float    @default(0)
+  width     Float    @default(100)
+  height    Float    @default(100)
+  fill      String   @default("#6366f1")
+  stroke    String   @default("#000000")
+  strokeWidth Float  @default(2)
+  rotation  Float    @default(0)
+  opacity   Float    @default(1)
+  data      String?  // JSON blob for extra properties (text content, path data, etc.)
+  zIndex    Int      @default(0)
+  createdBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [createdBy], references: [id])
+
+  @@index([roomId])
+  @@map("shapes")
+}
