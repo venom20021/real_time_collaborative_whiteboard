@@ -240,7 +240,7 @@ export default function Home() {
                       }
                     }}
                     disabled={deleteRoomMutation.isPending}
-                    className="ml-3 p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                    className="ml-3 p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-lg max-sm:opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all"
                     title="Delete room"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
