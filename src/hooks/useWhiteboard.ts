@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import * as Y from "yjs";
 import { getSocket, connectSocket, disconnectSocket } from "@/lib/socket";
-import type { Shape, CursorData } from "@/types/shared";
+import type { Shape, CursorData, Tool, ViewportState } from "@/types/shared";
 import { generateId } from "@/lib/id";
 
 // ---- Binary encoding helpers for Yjs updates over WebSocket ----
@@ -20,6 +20,7 @@ interface UseWhiteboardOptions {
   userId: string;
   userName: string;
   userColor: string;
+  onViewportUpdate?: (viewport: ViewportState) => void;
 }
 
 interface UseWhiteboardReturn {
@@ -29,7 +30,8 @@ interface UseWhiteboardReturn {
   addShape: (shape: any) => void;
   updateShape: (id: string, updates: Partial<Shape>) => void;
   deleteShape: (id: string) => void;
-  moveCursor: (position: { x: number; y: number } | null) => void;
+  moveCursor: (position: { x: number; y: number } | null, tool?: Tool) => void;
+  syncViewport: (viewport: ViewportState) => void;
   undo: () => void;
   redo: () => void;
 }
@@ -39,6 +41,7 @@ export function useWhiteboard({
   userId,
   userName,
   userColor,
+  onViewportUpdate,
 }: UseWhiteboardOptions): UseWhiteboardReturn {
   const [shapes, setShapes] = useState<Shape[]>([]);
   const [cursors, setCursors] = useState<Map<string, CursorData>>(new Map());
@@ -130,6 +133,11 @@ export function useWhiteboard({
       });
     });
 
+    // Viewport sync from other users
+    socket.on("viewport:update", (data: { x: number; y: number; scale: number }) => {
+      onViewportUpdate?.(data);
+    });
+
     // If already connected, join room immediately
     if (socket.connected) {
       socket.emit("room:join", { roomId, userId, userName, userColor });
@@ -142,6 +150,7 @@ export function useWhiteboard({
       socket.off("yjs:update");
       socket.off("room:state");
       socket.off("cursor:update");
+      socket.off("viewport:update");
       socket.off("user:left");
       socket.off("connect");
       disconnectSocket();
@@ -188,11 +197,19 @@ export function useWhiteboard({
   }, []);
 
   const moveCursor = useCallback(
-    (position: { x: number; y: number } | null) => {
+    (position: { x: number; y: number } | null, tool?: Tool) => {
       const socket = getSocket();
       if (position) {
-        socket.emit("cursor:move", position);
+        socket.emit("cursor:move", { position, tool });
       }
+    },
+    []
+  );
+
+  const syncViewport = useCallback(
+    (viewport: { x: number; y: number; scale: number }) => {
+      const socket = getSocket();
+      socket.emit("viewport:move", viewport);
     },
     []
   );
@@ -213,6 +230,7 @@ export function useWhiteboard({
     updateShape,
     deleteShape,
     moveCursor,
+    syncViewport,
     undo,
     redo,
   };

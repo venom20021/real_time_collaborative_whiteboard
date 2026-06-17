@@ -250,23 +250,35 @@ io.on("connection", (socket) => {
   });
 
   // ---- Awareness / Cursor position ----
-  socket.on("cursor:move", (position: { x: number; y: number }) => {
+  socket.on("cursor:move", (data: { position: { x: number; y: number }; tool?: string }) => {
     if (!currentRoom) return;
     const awareness = roomAwareness.get(currentRoom);
     if (!awareness) return;
 
     const state = awareness.get(userId);
     if (state) {
-      state.position = position;
+      state.position = data.position;
       state.lastActive = Date.now();
+      (state as any).tool = data.tool;
       awareness.set(userId, state);
     }
 
     io.to(currentRoom).emit("cursor:update", {
       userId,
-      position,
+      position: data.position,
       userName: state?.userName || "Anonymous",
       color: state?.color || "#6366f1",
+      tool: data.tool,
+      lastActive: Date.now(),
+    });
+  });
+
+  // ---- Viewport sync ----
+  socket.on("viewport:move", (data: { x: number; y: number; scale: number }) => {
+    if (!currentRoom) return;
+    socket.to(currentRoom).emit("viewport:update", {
+      userId,
+      ...data,
     });
   });
 

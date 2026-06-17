@@ -53,6 +53,7 @@ export function CursorOverlay({
     >
       {remoteCursors.map((cursor) => {
         if (!cursor.position) return null;
+        const isErasing = cursor.tool === "eraser";
         return (
           <div
             key={cursor.userId}
@@ -63,30 +64,54 @@ export function CursorOverlay({
               transform: "translate(-2px, -2px)",
             }}
           >
-            {/* Cursor arrow */}
-            <svg
-              width="16"
-              height="20"
-              viewBox="0 0 16 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M2 2L12 14H7.5L6 18L4 14H2V2Z"
-                fill={cursor.color}
-                stroke="white"
-                strokeWidth="1"
-              />
-            </svg>
+            {/* Cursor arrow or eraser indicator */}
+            {isErasing ? (
+              <div className="relative flex items-center justify-center">
+                {/* Eraser ring */}
+                <div
+                  className="absolute rounded-full animate-ping"
+                  style={{
+                    width: 24,
+                    height: 24,
+                    border: `2px solid ${cursor.color}`,
+                    opacity: 0.5,
+                  }}
+                />
+                {/* Eraser icon */}
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-lg"
+                  style={{
+                    backgroundColor: cursor.color,
+                  }}
+                >
+                  🧹
+                </div>
+              </div>
+            ) : (
+              <svg
+                width="16"
+                height="20"
+                viewBox="0 0 16 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M2 2L12 14H7.5L6 18L4 14H2V2Z"
+                  fill={cursor.color}
+                  stroke="white"
+                  strokeWidth="1"
+                />
+              </svg>
+            )}
             {/* User name label */}
             <div
               className="absolute left-4 top-0 px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap"
               style={{
-                backgroundColor: cursor.color,
+                backgroundColor: isErasing ? "#ef4444" : cursor.color,
                 color: "#fff",
               }}
             >
-              {cursor.userName}
+              {cursor.userName}{isErasing ? " (erasing)" : ""}
             </div>
           </div>
         );

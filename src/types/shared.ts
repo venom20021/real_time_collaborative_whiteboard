@@ -41,6 +41,15 @@ export enum WS_EVENTS {
   CURSOR_UPDATE = "cursor:update",
   USER_JOINED = "user:joined",
   USER_LEFT = "user:left",
+  VIEWPORT_MOVE = "viewport:move",
+  VIEWPORT_UPDATE = "viewport:update",
+}
+
+// ---- Viewport sync types ----
+export interface ViewportState {
+  x: number;
+  y: number;
+  scale: number;
 }
 
 // ---- Cursor/awareness types ----
@@ -55,6 +64,7 @@ export interface CursorData {
   color: string;
   position: CursorPosition | null;
   lastActive: number;
+  tool?: Tool;
 }
 
 export interface RoomState {

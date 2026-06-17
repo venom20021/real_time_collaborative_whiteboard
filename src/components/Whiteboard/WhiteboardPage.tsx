@@ -6,7 +6,7 @@ import { useWhiteboard } from "@/hooks/useWhiteboard";
 import { Toolbar } from "./Toolbar";
 import { UsersPanel } from "./UsersPanel";
 import { CursorOverlay } from "./CursorOverlay";
-import type { Shape, Tool } from "@/types/shared";
+import type { Shape, Tool, ViewportState } from "@/types/shared";
 import { generateId } from "@/lib/id";
 
 const WhiteboardCanvas = dynamic(
@@ -43,6 +43,11 @@ export function WhiteboardPage({
   const [strokeColor, setStrokeColor] = useState("#000000");
   const [fillColor, setFillColor] = useState("#6366f1");
   const [strokeWidth, setStrokeWidth] = useState(4);
+  const [remoteViewport, setRemoteViewport] = useState<ViewportState | null>(null);
+
+  const handleViewportUpdate = useCallback((viewport: ViewportState) => {
+    setRemoteViewport(viewport);
+  }, []);
 
   const {
     shapes,
@@ -52,6 +57,7 @@ export function WhiteboardPage({
     updateShape,
     deleteShape,
     moveCursor,
+    syncViewport,
     undo,
     redo,
   } = useWhiteboard({
@@ -59,7 +65,15 @@ export function WhiteboardPage({
     userId,
     userName,
     userColor,
+    onViewportUpdate: handleViewportUpdate,
   });
+
+  const handleViewportMove = useCallback(
+    (viewport: ViewportState) => {
+      syncViewport(viewport);
+    },
+    [syncViewport]
+  );
 
   const handleAddShape = useCallback(
     (shapeData: any) => {
@@ -79,9 +93,9 @@ export function WhiteboardPage({
 
   const handleMouseMove = useCallback(
     (pos: { x: number; y: number } | null) => {
-      moveCursor(pos);
+      moveCursor(pos, selectedTool);
     },
-    [moveCursor]
+    [moveCursor, selectedTool]
   );
 
   const handleToolChange = useCallback((tool: Tool) => {
@@ -296,6 +310,8 @@ export function WhiteboardPage({
             onImageUpload={handleImageUpload}
             onTransformEndShape={handleTransformEndShape}
             onTextEdit={handleTextEdit}
+            onViewportMove={handleViewportMove}
+            viewportFromRemote={remoteViewport}
           />
           <CursorOverlay
             cursors={cursors}

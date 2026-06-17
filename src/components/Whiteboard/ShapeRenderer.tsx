@@ -7,6 +7,7 @@ import type { Shape } from "@/types/shared";
 interface ShapeRendererProps {
   shape: Shape;
   isSelected: boolean;
+  isEraserHovered?: boolean;
   onSelect: () => void;
   onDoubleClick: () => void;
   onDragEnd: (x: number, y: number) => void;
@@ -16,6 +17,7 @@ interface ShapeRendererProps {
 export function ShapeRenderer({
   shape,
   isSelected,
+  isEraserHovered,
   onSelect,
   onDoubleClick,
   onDragEnd,
@@ -194,6 +196,23 @@ export function ShapeRenderer({
           strokeWidth={2}
           dash={[4, 4]}
           listening={false}
+        />
+      )}
+
+      {/* Eraser hover highlight */}
+      {isEraserHovered && !isSelected && (
+        <Rect
+          x={sel.x}
+          y={sel.y}
+          width={sel.w}
+          height={sel.h}
+          stroke="#ef4444"
+          strokeWidth={2.5}
+          dash={[6, 3]}
+          listening={false}
+          shadowColor="#ef4444"
+          shadowBlur={8}
+          shadowOpacity={0.4}
         />
       )}
     </Group>
