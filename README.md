@@ -1,5 +1,10 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Screenshot
+
+![Real-time Collaborative Whiteboard](screenshot.png)
+
+
 ## Getting Started
 
 First, run the development server:
